@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250" width="250" height="250">
+  <rect width="250" height="250" fill="#f0f0f0"/>
+  <text x="125" y="115" font-family="Arial" font-size="16" text-anchor="middle" fill="#666">France Outline</text>
+  <text x="125" y="135" font-family="Arial" font-size="12" text-anchor="middle" fill="#999">(Replace with actual image)</text>
+  <path d="M 125 40 L 140 60 L 160 70 L 180 90 L 190 120 L 185 150 L 170 180 L 140 200 L 100 210 L 70 200 L 50 170 L 45 140 L 50 110 L 60 80 L 80 60 L 100 50 Z" fill="#e24a4a" stroke="#a02c2c" stroke-width="2"/>
+</svg>
