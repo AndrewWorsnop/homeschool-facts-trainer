@@ -1,0 +1,34 @@
+{
+  "quizzes": [
+    {
+      "section": "Times Tables",
+      "title": "2 Times Table",
+      "file": "quizzes/times-tables/2-times-table.md"
+    },
+    {
+      "section": "Times Tables",
+      "title": "5 Times Table",
+      "file": "quizzes/times-tables/5-times-table.md"
+    },
+    {
+      "section": "Mental Math",
+      "title": "Addition Under 20",
+      "file": "quizzes/mental-math/addition-under-20.md"
+    },
+    {
+      "section": "Mental Math",
+      "title": "Simple Fractions",
+      "file": "quizzes/mental-math/fractions.md"
+    },
+    {
+      "section": "Geography",
+      "title": "European Countries",
+      "file": "quizzes/geography/european-countries.md"
+    },
+    {
+      "section": "Geography",
+      "title": "Country Shapes",
+      "file": "quizzes/geography/country-shapes.md"
+    }
+  ]
+}

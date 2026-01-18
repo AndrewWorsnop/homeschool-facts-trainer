@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeschool Quiz Trainer</title>
+
+    <!-- KaTeX for LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .quiz-list {
+            list-style: none;
+        }
+
+        .quiz-item {
+            background: #f7f7f7;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .quiz-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .quiz-item:active {
+            transform: translateY(0);
+        }
+
+        .question-container {
+            margin-top: 20px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .question-text img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: block;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f7f7f7;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e7e7f7;
+            border-color: #667eea;
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn, .next-btn, .back-btn, .finish-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .next-btn {
+            background: #48bb78;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .next-btn:hover {
+            background: #38a169;
+        }
+
+        .back-btn {
+            background: #718096;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #4a5568;
+        }
+
+        .finish-btn {
+            background: #667eea;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .finish-btn:hover {
+            background: #5568d3;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .feedback.correct {
+            background: #c6f6d5;
+            border: 2px solid #48bb78;
+            color: #22543d;
+        }
+
+        .feedback.incorrect {
+            background: #fed7d7;
+            border: 2px solid #f56565;
+            color: #742a2a;
+        }
+
+        .progress {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 3rem;
+            color: #667eea;
+            margin: 30px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Quiz Selection Screen -->
+        <div id="quiz-selection">
+            <h1>Homeschool Quiz Trainer</h1>
+            <div id="quiz-list-container"></div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <button class="back-btn" onclick="backToSelection()">← Back to Quiz Selection</button>
+            <div class="progress" id="progress"></div>
+            <div class="question-container">
+                <div class="question-text" id="question-text"></div>
+
+                <!-- Short Answer Input -->
+                <div id="short-answer-container" class="hidden">
+                    <input type="text" class="answer-input" id="answer-input" placeholder="Type your answer here">
+                    <button class="submit-btn" onclick="submitAnswer()">Submit Answer</button>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <ul class="options" id="options-container"></ul>
+
+                <!-- Feedback -->
+                <div id="feedback-container"></div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+            <h1>Quiz Complete!</h1>
+            <div class="score" id="score"></div>
+            <button class="finish-btn" onclick="backToSelection()">Back to Quiz Selection</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data structure
+        const quizData = {
+            quizzes: []
+        };
+
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let selectedQuestions = [];
+        let correctAnswers = 0;
+        let answerSubmitted = false;
+
+        // Load quiz list from quizzes.json
+        async function loadQuizList() {
+            try {
+                const response = await fetch('quizzes.json');
+                const data = await response.json();
+                quizData.quizzes = data.quizzes;
+                displayQuizList();
+            } catch (error) {
+                console.error('Error loading quiz list:', error);
+                document.getElementById('quiz-list-container').innerHTML =
+                    '<p style="color: red;">Error loading quizzes. Please make sure quizzes.json exists.</p>';
+            }
+        }
+
+        // Display quiz list organized by sections
+        function displayQuizList() {
+            const container = document.getElementById('quiz-list-container');
+            const sections = {};
+
+            // Group quizzes by section
+            quizData.quizzes.forEach(quiz => {
+                if (!sections[quiz.section]) {
+                    sections[quiz.section] = [];
+                }
+                sections[quiz.section].push(quiz);
+            });
+
+            // Display sections and quizzes
+            let html = '';
+            for (const [section, quizzes] of Object.entries(sections)) {
+                html += `<h2>${section}</h2><ul class="quiz-list">`;
+                quizzes.forEach(quiz => {
+                    html += `<li class="quiz-item" onclick="startQuiz('${quiz.file}')">${quiz.title}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Parse markdown quiz file
+        async function parseQuizMarkdown(text, quizPath) {
+            const lines = text.split('\n');
+            const questions = [];
+            let metadata = {};
+            let currentQuestion = null;
+            let inMetadata = false;
+            let metadataText = '';
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // Parse YAML frontmatter
+                if (line.trim() === '---') {
+                    if (!inMetadata && i === 0) {
+                        inMetadata = true;
+                        continue;
+                    } else if (inMetadata) {
+                        inMetadata = false;
+                        // Parse metadata
+                        metadataText.split('\n').forEach(metaLine => {
+                            const match = metaLine.match(/^(\w+):\s*(.+)$/);
+                            if (match) {
+                                const key = match[1];
+                                let value = match[2].replace(/^["']|["']$/g, '');
+                                if (value === 'true') value = true;
+                                if (value === 'false') value = false;
+                                metadata[key] = value;
+                            }
+                        });
+                        continue;
+                    }
+                }
+
+                if (inMetadata) {
+                    metadataText += line + '\n';
+                    continue;
+                }
+
+                // Parse questions
+                if (line.trim().startsWith('# Question')) {
+                    if (currentQuestion && currentQuestion.question) {
+                        questions.push(currentQuestion);
+                    }
+                    currentQuestion = {
+                        question: '',
+                        answer: '',
+                        options: [],
+                        type: metadata.type || 'short-answer'
+                    };
+                } else if (line.trim().startsWith('## Answer')) {
+                    // Next line(s) will be the answer
+                    let answerLines = [];
+                    i++;
+                    while (i < lines.length && !lines[i].trim().startsWith('#') && lines[i].trim() !== '---') {
+                        if (lines[i].trim()) {
+                            answerLines.push(lines[i].trim());
+                        }
+                        i++;
+                    }
+                    i--; // Step back one line
+                    if (currentQuestion) {
+                        currentQuestion.answer = answerLines.join(' ');
+                    }
+                } else if (line.trim().startsWith('## Options')) {
+                    // Next lines will be options
+                    i++;
+                    while (i < lines.length && !lines[i].trim().startsWith('#') && lines[i].trim() !== '---') {
+                        const optionLine = lines[i].trim();
+                        if (optionLine.startsWith('-')) {
+                            const optionText = optionLine.substring(1).trim();
+                            const isCorrect = optionText.endsWith('*');
+                            const text = isCorrect ? optionText.slice(0, -1).trim() : optionText;
+                            if (currentQuestion) {
+                                currentQuestion.options.push({
+                                    text: text,
+                                    correct: isCorrect
+                                });
+                                if (isCorrect) {
+                                    currentQuestion.answer = text;
+                                }
+                            }
+                        }
+                        i++;
+                    }
+                    i--; // Step back one line
+                } else if (currentQuestion && !line.trim().startsWith('##') && line.trim() !== '---') {
+                    // Add to question text
+                    if (line.trim()) {
+                        currentQuestion.question += (currentQuestion.question ? ' ' : '') + line.trim();
+                    }
+                }
+            }
+
+            // Add last question
+            if (currentQuestion && currentQuestion.question) {
+                questions.push(currentQuestion);
+            }
+
+            // Convert image paths to be relative to quiz file
+            const quizDir = quizPath.substring(0, quizPath.lastIndexOf('/'));
+            questions.forEach(q => {
+                q.question = q.question.replace(/!\[([^\]]*)\]\(\.\/([^)]+)\)/g, (match, alt, path) => {
+                    return `![${alt}](${quizDir}/${path})`;
+                });
+            });
+
+            return { metadata, questions };
+        }
+
+        // Start a quiz
+        async function startQuiz(quizFile) {
+            try {
+                const response = await fetch(quizFile);
+                const text = await response.text();
+                const { metadata, questions } = await parseQuizMarkdown(text, quizFile);
+
+                currentQuiz = {
+                    title: metadata.title || 'Quiz',
+                    type: metadata.type || 'short-answer',
+                    shuffle: metadata.shuffle !== false,
+                    questions: questions
+                };
+
+                // Select random 10 questions (or all if less than 10)
+                const numQuestions = Math.min(10, currentQuiz.questions.length);
+                if (currentQuiz.shuffle) {
+                    selectedQuestions = shuffleArray([...currentQuiz.questions]).slice(0, numQuestions);
+                } else {
+                    selectedQuestions = currentQuiz.questions.slice(0, numQuestions);
+                }
+
+                currentQuestionIndex = 0;
+                correctAnswers = 0;
+                answerSubmitted = false;
+
+                // Show quiz screen
+                document.getElementById('quiz-selection').classList.add('hidden');
+                document.getElementById('quiz-screen').classList.remove('hidden');
+                document.getElementById('results-screen').classList.add('hidden');
+
+                displayQuestion();
+            } catch (error) {
+                console.error('Error starting quiz:', error);
+                alert('Error loading quiz. Please try again.');
+            }
+        }
+
+        // Shuffle array
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Display current question
+        function displayQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            answerSubmitted = false;
+
+            // Update progress
+            document.getElementById('progress').textContent =
+                `Question ${currentQuestionIndex + 1} of ${selectedQuestions.length}`;
+
+            // Display question text (with image and LaTeX support)
+            document.getElementById('question-text').innerHTML = renderMarkdown(question.question);
+
+            // Render LaTeX if present
+            renderMath();
+
+            // Clear feedback
+            document.getElementById('feedback-container').innerHTML = '';
+
+            if (question.type === 'multiple-choice') {
+                // Show multiple choice options
+                document.getElementById('short-answer-container').classList.add('hidden');
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+                optionsContainer.classList.remove('hidden');
+
+                // Shuffle options if quiz has shuffle enabled
+                const options = currentQuiz.shuffle ? shuffleArray(question.options) : question.options;
+
+                options.forEach((option, index) => {
+                    const li = document.createElement('li');
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option.text;
+                    button.onclick = () => submitMultipleChoice(option.text, option.correct);
+                    li.appendChild(button);
+                    optionsContainer.appendChild(li);
+                });
+            } else {
+                // Show short answer input
+                document.getElementById('options-container').classList.add('hidden');
+                document.getElementById('short-answer-container').classList.remove('hidden');
+                document.getElementById('answer-input').value = '';
+                document.getElementById('answer-input').focus();
+
+                // Allow Enter key to submit
+                document.getElementById('answer-input').onkeypress = (e) => {
+                    if (e.key === 'Enter' && !answerSubmitted) {
+                        submitAnswer();
+                    }
+                };
+            }
+        }
+
+        // Render markdown (simple implementation for images)
+        function renderMarkdown(text) {
+            // Convert image markdown to HTML
+            let html = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+            return html;
+        }
+
+        // Render LaTeX math
+        function renderMath() {
+            if (window.renderMathInElement) {
+                renderMathInElement(document.getElementById('question-text'), {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        }
+
+        // Submit short answer
+        function submitAnswer() {
+            if (answerSubmitted) return;
+
+            const userAnswer = document.getElementById('answer-input').value;
+            const correctAnswer = selectedQuestions[currentQuestionIndex].answer;
+
+            const isCorrect = checkAnswer(userAnswer, correctAnswer);
+            showFeedback(isCorrect, correctAnswer);
+        }
+
+        // Submit multiple choice answer
+        function submitMultipleChoice(selectedAnswer, isCorrect) {
+            if (answerSubmitted) return;
+
+            const correctAnswer = selectedQuestions[currentQuestionIndex].answer;
+            showFeedback(isCorrect, correctAnswer);
+        }
+
+        // Check if answer is correct (with flexible matching)
+        function checkAnswer(userAnswer, correctAnswer) {
+            // Trim whitespace
+            const user = userAnswer.trim();
+            const correct = correctAnswer.trim();
+
+            // Try exact match (case-insensitive)
+            if (user.toLowerCase() === correct.toLowerCase()) {
+                return true;
+            }
+
+            // Try numeric comparison
+            const userNum = parseFloat(user);
+            const correctNum = parseFloat(correct);
+            if (!isNaN(userNum) && !isNaN(correctNum)) {
+                return Math.abs(userNum - correctNum) < 0.0001;
+            }
+
+            // Try fraction comparison (e.g., "1/2" vs "0.5")
+            const userFraction = parseFraction(user);
+            const correctFraction = parseFraction(correct);
+            if (userFraction !== null && correctFraction !== null) {
+                return Math.abs(userFraction - correctFraction) < 0.0001;
+            }
+
+            // Try comparing user's numeric answer to correct fraction
+            if (!isNaN(userNum) && correctFraction !== null) {
+                return Math.abs(userNum - correctFraction) < 0.0001;
+            }
+            if (!isNaN(correctNum) && userFraction !== null) {
+                return Math.abs(userFraction - correctNum) < 0.0001;
+            }
+
+            return false;
+        }
+
+        // Parse fraction to decimal
+        function parseFraction(str) {
+            const match = str.match(/^(\d+)\/(\d+)$/);
+            if (match) {
+                const numerator = parseInt(match[1]);
+                const denominator = parseInt(match[2]);
+                if (denominator !== 0) {
+                    return numerator / denominator;
+                }
+            }
+            return null;
+        }
+
+        // Show feedback
+        function showFeedback(isCorrect, correctAnswer) {
+            answerSubmitted = true;
+
+            if (isCorrect) {
+                correctAnswers++;
+            }
+
+            const feedbackContainer = document.getElementById('feedback-container');
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+
+            if (isCorrect) {
+                feedbackDiv.innerHTML = '<strong>✓ Correct!</strong>';
+            } else {
+                feedbackDiv.innerHTML = `<strong>✗ Not quite.</strong><br>The correct answer is: <strong>${correctAnswer}</strong>`;
+            }
+
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.appendChild(feedbackDiv);
+
+            // Show next button
+            const nextBtn = document.createElement('button');
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                nextBtn.className = 'next-btn';
+                nextBtn.textContent = 'Next Question →';
+                nextBtn.onclick = nextQuestion;
+            } else {
+                nextBtn.className = 'next-btn';
+                nextBtn.textContent = 'See Results →';
+                nextBtn.onclick = showResults;
+            }
+            feedbackContainer.appendChild(nextBtn);
+
+            // Disable input/buttons
+            if (selectedQuestions[currentQuestionIndex].type === 'short-answer') {
+                document.getElementById('answer-input').disabled = true;
+                document.querySelector('.submit-btn').disabled = true;
+            } else {
+                document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            }
+        }
+
+        // Next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            // Re-enable inputs
+            document.getElementById('answer-input').disabled = false;
+            document.querySelector('.submit-btn').disabled = false;
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = false);
+
+            displayQuestion();
+        }
+
+        // Show results
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+
+            const percentage = Math.round((correctAnswers / selectedQuestions.length) * 100);
+            document.getElementById('score').textContent =
+                `${correctAnswers} / ${selectedQuestions.length} (${percentage}%)`;
+        }
+
+        // Back to selection
+        function backToSelection() {
+            document.getElementById('quiz-selection').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+        }
+
+        // Initialize app
+        loadQuizList();
+    </script>
+</body>
+</html>
