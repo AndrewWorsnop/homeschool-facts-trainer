@@ -435,13 +435,23 @@
                 questions.push(currentQuestion);
             }
 
+            // Validate questions
+            console.log('Raw questions parsed:', questions.length);
+            questions.forEach((q, idx) => {
+                if (!q.question || !q.answer) {
+                    console.warn(`Question ${idx + 1} missing question or answer:`, q);
+                }
+            });
+
             // Convert image paths to be relative to quiz file
             const quizDir = quizPath.substring(0, quizPath.lastIndexOf('/'));
-            questions.forEach(q => {
-                q.question = q.question.replace(/!\[([^\]]*)\]\(\.\/([^)]+)\)/g, (match, alt, path) => {
-                    return `![${alt}](${quizDir}/${path})`;
+            if (quizDir) {
+                questions.forEach(q => {
+                    q.question = q.question.replace(/!\[([^\]]*)\]\(\.\/([^)]+)\)/g, (match, alt, path) => {
+                        return `![${alt}](${quizDir}/${path})`;
+                    });
                 });
-            });
+            }
 
             return { metadata, questions };
         }
@@ -449,9 +459,23 @@
         // Start a quiz
         async function startQuiz(quizFile) {
             try {
+                console.log('Loading quiz:', quizFile);
                 const response = await fetch(quizFile);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load quiz file (HTTP ${response.status}): ${quizFile}`);
+                }
+
                 const text = await response.text();
+                console.log('Quiz file loaded, size:', text.length, 'bytes');
+
                 const { metadata, questions } = await parseQuizMarkdown(text, quizFile);
+                console.log('Parsed metadata:', metadata);
+                console.log('Parsed questions:', questions.length);
+
+                if (!questions || questions.length === 0) {
+                    throw new Error('No questions found in quiz file. Please check the markdown format.');
+                }
 
                 currentQuiz = {
                     title: metadata.title || 'Quiz',
@@ -480,7 +504,7 @@
                 displayQuestion();
             } catch (error) {
                 console.error('Error starting quiz:', error);
-                alert('Error loading quiz. Please try again.');
+                alert('Error loading quiz: ' + error.message + '\n\nPlease check the browser console (F12) for more details.');
             }
         }
 
